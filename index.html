@@ -68,8 +68,11 @@
     .home-card{aspect-ratio:auto; padding:34px 20px}
     .home-name{font-size:30px}
   }
-  .subjectbar{display:flex; background:var(--chip); border-radius:99px; padding:3px; gap:2px}
-  .subjectbar[hidden]{display:none}
+  .subjectbar{display:flex; justify-content:flex-start; background:var(--chip); border-radius:99px; padding:3px; gap:2px}
+  .subjectbar[hidden]{display:none !important}
+  .subjectbar .subject{flex:0 0 auto; padding:8px 16px}
+  .app[hidden]{display:none !important}
+  .home[hidden]{display:none !important}
   .subject{
     flex:1; border:none; background:transparent; color:var(--chip-fg);
     font:inherit; font-size:14px; font-weight:600; padding:8px 10px; border-radius:99px;
@@ -241,9 +244,7 @@
   </div>
 
   <div class="subjectbar" id="subjectbar" hidden>
-    <button class="subject" id="homeBtn" type="button">首页</button>
-    <button class="subject active" id="subjEn" type="button">英语</button>
-    <button class="subject" id="subjZh" type="button">语文</button>
+    <button class="subject" id="homeBtn" type="button">← 首页</button>
   </div>
 
   <div class="app" id="appEn">
@@ -6940,8 +6941,6 @@
     subject = s;
     appEnEl.hidden = (s !== 'en');
     appZhEl.hidden = (s !== 'zh');
-    subjEnEl.className = 'subject' + (s === 'en' ? ' active' : '');
-    subjZhEl.className = 'subject' + (s === 'zh' ? ' active' : '');
     if (sheetEl && !sheetEl.hidden) closePicker();
     if (s === 'zh') {
       if (!zhState.current && !zhState.finished) zhPrepare();
@@ -6963,8 +6962,6 @@
     setSubject(s);
   }
 
-  subjEnEl.addEventListener('click', function () { setSubject('en'); });
-  subjZhEl.addEventListener('click', function () { setSubject('zh'); });
   homeEnEl.addEventListener('click', function () { enterSubject('en'); });
   homeZhEl.addEventListener('click', function () { enterSubject('zh'); });
   homeBtnEl.addEventListener('click', showHome);
@@ -7014,8 +7011,15 @@
 
 <script>
 if ('serviceWorker' in navigator) {
+  var hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if (!hadController) return;
+    window.location.reload();
+  });
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      if (reg.update) reg.update();
+    }).catch(function(){});
   });
 }
 </script>
