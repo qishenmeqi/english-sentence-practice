@@ -1,6 +1,6 @@
 /* 离线缓存：第一次打开联网后，之后断网也能用。
    以后改了 index.html，记得把 VERSION 的数字加一，iPad 才会拿到新版本。 */
-const VERSION = 'v36';
+const VERSION = 'v37';
 const CACHE = 'en-sentence-practice-' + VERSION;
 const ASSETS = [
   './',

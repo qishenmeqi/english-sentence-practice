@@ -48,7 +48,28 @@
   .toolbar{flex:0 0 auto; padding:10px 14px; font-size:14px}
   .toolbar.grow{flex:1; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px}
   .chev{font-size:11px; opacity:.7; margin-left:8px}
+  .home{display:flex; flex-direction:column; gap:22px; justify-content:center; min-height:calc(100vh - 90px)}
+  .home[hidden]{display:none}
+  .home-title{font-size:26px; font-weight:700; text-align:center}
+  .home-sub{font-size:14px; color:var(--muted); text-align:center; margin-top:-12px}
+  .home-cards{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .home-card{
+    aspect-ratio:1/1; border:1px solid var(--border); border-radius:26px; background:var(--card);
+    color:var(--fg); display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; cursor:pointer; box-shadow:var(--shadow); transition:.18s; font:inherit;
+  }
+  .home-card:hover{transform:translateY(-3px); border-color:var(--accent)}
+  .home-emoji{font-size:58px; line-height:1}
+  .home-name{font-size:38px; font-weight:700; letter-spacing:.04em}
+  .home-desc{font-size:13px; color:var(--muted)}
+  @media (max-width:560px){
+    .home{min-height:auto; padding:24px 0}
+    .home-cards{grid-template-columns:1fr}
+    .home-card{aspect-ratio:auto; padding:34px 20px}
+    .home-name{font-size:30px}
+  }
   .subjectbar{display:flex; background:var(--chip); border-radius:99px; padding:3px; gap:2px}
+  .subjectbar[hidden]{display:none}
   .subject{
     flex:1; border:none; background:transparent; color:var(--chip-fg);
     font:inherit; font-size:14px; font-weight:600; padding:8px 10px; border-radius:99px;
@@ -202,7 +223,25 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="subjectbar">
+  <div class="home" id="home">
+    <div class="home-title">选择练习</div>
+    <div class="home-sub">英语句子、语文句子，每天练一组</div>
+    <div class="home-cards">
+      <button class="home-card" id="homeEn" type="button">
+        <span class="home-emoji">🔤</span>
+        <span class="home-name">英语</span>
+        <span class="home-desc" id="homeEnDesc">句子练习</span>
+      </button>
+      <button class="home-card" id="homeZh" type="button">
+        <span class="home-emoji">📖</span>
+        <span class="home-name">语文</span>
+        <span class="home-desc" id="homeZhDesc">句子练习</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="subjectbar" id="subjectbar" hidden>
+    <button class="subject" id="homeBtn" type="button">首页</button>
     <button class="subject active" id="subjEn" type="button">英语</button>
     <button class="subject" id="subjZh" type="button">语文</button>
   </div>
@@ -5514,6 +5553,11 @@
   var appZhEl = document.getElementById('appZh');
   var subjEnEl = document.getElementById('subjEn');
   var subjZhEl = document.getElementById('subjZh');
+  var subjectbarEl = document.getElementById('subjectbar');
+  var homeEl = document.getElementById('home');
+  var homeEnEl = document.getElementById('homeEn');
+  var homeZhEl = document.getElementById('homeZh');
+  var homeBtnEl = document.getElementById('homeBtn');
   var zhQuizEl = document.getElementById('zhQuiz');
   var zhDoneEl = document.getElementById('zhDone');
   var zhCatnameEl = document.getElementById('zhCatname');
@@ -6458,6 +6502,13 @@
     }
   ];
 
+  var totalEnCount = 0;
+  GROUPS.forEach(function (g) { g.subs.forEach(function (c) { totalEnCount += c.items.length; }); });
+  var totalZhCount = 0;
+  ZH_GROUPS.forEach(function (g) { g.subs.forEach(function (c) { totalZhCount += c.items.length; }); });
+  document.getElementById('homeEnDesc').textContent = '句子练习 · ' + totalEnCount + ' 题';
+  document.getElementById('homeZhDesc').textContent = '句子练习 · ' + totalZhCount + ' 题';
+
   const ZH_KEY = 'zh-sentence-practice-v2';
 
   const zhState = {
@@ -6898,8 +6949,25 @@
     }
   }
 
+  function showHome() {
+    homeEl.hidden = false;
+    subjectbarEl.hidden = true;
+    appEnEl.hidden = true;
+    appZhEl.hidden = true;
+    if (sheetEl && !sheetEl.hidden) closePicker();
+  }
+
+  function enterSubject(s) {
+    homeEl.hidden = true;
+    subjectbarEl.hidden = false;
+    setSubject(s);
+  }
+
   subjEnEl.addEventListener('click', function () { setSubject('en'); });
   subjZhEl.addEventListener('click', function () { setSubject('zh'); });
+  homeEnEl.addEventListener('click', function () { enterSubject('en'); });
+  homeZhEl.addEventListener('click', function () { enterSubject('zh'); });
+  homeBtnEl.addEventListener('click', showHome);
 
   zhPickerBtnEl.addEventListener('click', openPicker);
   zhRedoBtnEl.addEventListener('click', zhRedo);
@@ -6940,7 +7008,7 @@
   }, { passive: true });
 
   prepare();
-  if (!hadSavedCat) openPicker();
+  showHome();
 })();
 </script>
 
